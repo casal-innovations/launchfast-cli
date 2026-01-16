@@ -1,0 +1,77 @@
+name: Publish to npm
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish (must match package.json)'
+        required: true
+        type: string
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify version matches package.json
+        run: |
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          if [ "$PACKAGE_VERSION" != "${{ github.event.inputs.version }}" ]; then
+            echo "Error: Input version (${{ github.event.inputs.version }}) does not match package.json version ($PACKAGE_VERSION)"
+            exit 1
+          fi
+
+      - name: Verify clean working tree
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "Error: Working tree is not clean"
+            git status
+            exit 1
+          fi
+
+      - name: Verify tests passed on this commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          RESULT=$(gh run list --workflow=test.yml --commit=${{ github.sha }} --json conclusion --limit 1 -q '.[0].conclusion')
+          if [ "$RESULT" != "success" ]; then
+            echo "Error: Tests have not passed on this commit (status: $RESULT)"
+            echo "Please ensure the 'Test' workflow has completed successfully before publishing."
+            exit 1
+          fi
+
+  publish:
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build
+
+      - name: Run all tests
+        run: npm test
+
+      - name: Publish
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

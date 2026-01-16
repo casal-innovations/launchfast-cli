@@ -1,0 +1,13 @@
+# Exclude internal documentation
+README.md
+CLAUDE.md
+
+# Source files (only publish dist)
+src/
+tsconfig.json
+tsup.config.ts
+
+# Development files
+.github/
+.git/
+node_modules/

@@ -1,0 +1,95 @@
+name: PR Validation
+
+on:
+  pull_request:
+    branches:
+      - main
+    types: [opened, edited, synchronize, reopened]
+
+jobs:
+  validate-commits:
+    name: Validate Commits
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate commit messages
+        run: npx commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }} --verbose
+
+  validate-pr-body:
+    name: Validate PR Body
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Release Impact Selection
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = context.payload.pull_request.body || '';
+
+            // Check for exactly one release impact selection
+            const patchChecked = body.includes('- [x] Patch') || body.includes('- [X] Patch');
+            const minorChecked = body.includes('- [x] Minor') || body.includes('- [X] Minor');
+            const majorChecked = body.includes('- [x] Major') || body.includes('- [X] Major');
+
+            const selectedCount = [patchChecked, minorChecked, majorChecked].filter(Boolean).length;
+
+            if (selectedCount === 0) {
+              core.setFailed('PR body must declare a Release Impact (Patch, Minor, or Major). Please select exactly one option in the PR description.');
+            } else if (selectedCount > 1) {
+              core.setFailed('PR body has multiple Release Impact selections. Please select exactly one option (Patch, Minor, or Major).');
+            } else {
+              console.log('Release Impact validation passed.');
+              if (patchChecked) console.log('Selected: Patch');
+              if (minorChecked) console.log('Selected: Minor');
+              if (majorChecked) console.log('Selected: Major');
+            }
+
+            // Check for Public API affected selection
+            const apiYes = body.includes('### Public API affected?') &&
+                          (body.includes('- [x] Yes') || body.includes('- [X] Yes'));
+            const apiNo = body.includes('### Public API affected?') &&
+                         (body.includes('- [x] No') || body.includes('- [X] No'));
+
+            // Additional validation for Major changes
+            if (majorChecked) {
+              if (!body.includes('What breaks?') || !body.includes('Migration path')) {
+                console.log('Warning: Major changes should describe what breaks and provide a migration path.');
+              }
+            }
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build
+
+      - name: Run tests
+        run: npm test

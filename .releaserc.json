@@ -1,0 +1,50 @@
+{
+	"branches": ["main"],
+	"plugins": [
+		[
+			"@semantic-release/commit-analyzer",
+			{
+				"preset": "conventionalcommits",
+				"releaseRules": [
+					{ "type": "break", "release": "major" },
+					{ "type": "feat", "release": "minor" },
+					{ "type": "fix", "release": "patch" },
+					{ "type": "docs", "release": false },
+					{ "type": "chore", "release": false },
+					{ "type": "test", "release": false }
+				]
+			}
+		],
+		[
+			"@semantic-release/release-notes-generator",
+			{
+				"preset": "conventionalcommits",
+				"presetConfig": {
+					"types": [
+						{ "type": "break", "section": "Breaking Changes", "hidden": false },
+						{ "type": "feat", "section": "Features", "hidden": false },
+						{ "type": "fix", "section": "Bug Fixes", "hidden": false },
+						{ "type": "docs", "section": "Documentation", "hidden": true },
+						{ "type": "chore", "section": "Maintenance", "hidden": true },
+						{ "type": "test", "section": "Tests", "hidden": true }
+					]
+				}
+			}
+		],
+		[
+			"@semantic-release/changelog",
+			{
+				"changelogFile": "CHANGELOG.md"
+			}
+		],
+		"@semantic-release/npm",
+		[
+			"@semantic-release/git",
+			{
+				"assets": ["CHANGELOG.md", "package.json", "package-lock.json"],
+				"message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+			}
+		],
+		"@semantic-release/github"
+	]
+}
