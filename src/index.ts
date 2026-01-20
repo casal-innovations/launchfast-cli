@@ -32,12 +32,13 @@ export async function run(): Promise<void> {
 
 	if (await hasValidAccess()) {
 		console.log('✓ Valid access token found\n')
-		await runInstaller()
 	} else {
 		console.log('No valid access token found. Starting authentication...\n')
 		await authenticate()
-		await runInstaller()
 	}
+
+	await installInstallerPackage()
+	await runInstaller()
 }
 
 /**
@@ -58,6 +59,30 @@ async function hasValidAccess(): Promise<boolean> {
 	} catch {
 		// Expected outcome: user doesn't have access to the package
 		return false
+	}
+}
+
+/**
+ * Install the private installer package using npm.
+ * This is called after authentication to download the package.
+ */
+async function installInstallerPackage(): Promise<void> {
+	if (process.env.LAUNCHFAST_SKIP_INSTALLER === 'true') {
+		return
+	}
+
+	console.log('Installing LaunchFast installer package...\n')
+	try {
+		await execAsync('npm install @launchfasthq/installer@latest --no-save')
+	} catch (error) {
+		if (error instanceof Error) {
+			console.error('Error: Failed to install the installer package.')
+			console.error('Please ensure your authentication token is valid.')
+			if ('stderr' in error) {
+				console.error(`\nDetails: ${(error as { stderr: string }).stderr}`)
+			}
+		}
+		process.exit(1)
 	}
 }
 

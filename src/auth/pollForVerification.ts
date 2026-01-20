@@ -100,6 +100,19 @@ function isTransientFailure(result: PollResult): boolean {
 	return result.type === 'boundary_error' || result.type === 'http_error'
 }
 
+/**
+ * Returns an appropriate error message for transient failures.
+ */
+function getTransientErrorMessage(result: PollResult): string {
+	if (result.type === 'boundary_error') {
+		return 'Network unstable — retrying...'
+	}
+	if (result.type === 'http_error') {
+		return `Server error (${result.status}) — retrying...`
+	}
+	return 'Temporary error — retrying...'
+}
+
 export async function pollForVerification(sessionId: string, deps: Partial<PollForVerificationDeps> = {}): Promise<string> {
 	const { fetch, sleep, exit, now, apiUrl, pollIntervalMs, pollTimeoutMs } = { ...getDefaultDeps(), ...deps }
 
@@ -117,7 +130,7 @@ export async function pollForVerification(sessionId: string, deps: Partial<PollF
 
 			// Show soft warning after 3 consecutive errors
 			if (consecutiveErrors >= 3 && !hasShownNetworkWarning) {
-				console.log('\nNetwork unstable — retrying...')
+				console.log('\n' + getTransientErrorMessage(result))
 				hasShownNetworkWarning = true
 			}
 
