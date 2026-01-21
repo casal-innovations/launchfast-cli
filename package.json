@@ -35,7 +35,7 @@
 		"zod": "^3.23.8"
 	},
 	"optionalDependencies": {
-		"@launchfasthq/installer": "^1.0.0"
+		"@launchfasthq/installer": "latest"
 	},
 	"devDependencies": {
 		"@commitlint/cli": "^20.3.1",
