@@ -1,3 +1,13 @@
+## [1.1.0](https://github.com/casal-innovations/launchfast-cli/compare/v1.0.0...v1.1.0) (2026-01-21)
+
+### Features
+
+* add explicit installer package download and improve error messages ([51ad6d2](https://github.com/casal-innovations/launchfast-cli/commit/51ad6d2417048fc6f0e0820afbbcf00662cbd44b))
+
+### Bug Fixes
+
+* make network-instability E2E test cross-platform compatible ([1f33ead](https://github.com/casal-innovations/launchfast-cli/commit/1f33eadf0b18cde9f1c43e3c7cce87a9e8c54a1c))
+
 ## 1.0.0 (2026-01-16)
 
 ### Features
