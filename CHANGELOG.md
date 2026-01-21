@@ -1,3 +1,9 @@
+## [1.3.1](https://github.com/casal-innovations/launchfast-cli/compare/v1.3.0...v1.3.1) (2026-01-21)
+
+### Bug Fixes
+
+* use latest installer package ([d2224a6](https://github.com/casal-innovations/launchfast-cli/commit/d2224a6587b347a1d20609ceb61fdc6f16c7f62b))
+
 ## [1.3.0](https://github.com/casal-innovations/launchfast-cli/compare/v1.2.0...v1.3.0) (2026-01-21)
 
 ### Features
