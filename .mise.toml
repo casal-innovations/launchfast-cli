@@ -1,0 +1,6 @@
+# Mise configuration for LaunchFast CLI
+# Declarative, per-project toolchain pinning that prevents version drift
+# See: https://mise.jdx.dev/
+
+[tools]
+node = "20"

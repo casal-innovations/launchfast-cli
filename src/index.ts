@@ -2,10 +2,14 @@ import { exec } from 'child_process'
 import { homedir } from 'os'
 import { join } from 'path'
 import { promisify } from 'util'
+import { checkNodeVersion } from './invariants.js'
 import { startAuthFlow } from './auth/startAuthFlow.js'
 import { pollForVerification } from './auth/pollForVerification.js'
 import { writeNpmToken } from './npm/writeNpmToken.js'
 import { promptEmail } from './ui/promptEmail.js'
+
+// Invariant check: runs before any application logic
+checkNodeVersion()
 
 const execAsync = promisify(exec)
 

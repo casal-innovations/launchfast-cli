@@ -61,6 +61,27 @@ jobs:
               }
             }
 
+  check-node-sync:
+    name: Check Node Version Sync
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout CLI
+        uses: actions/checkout@v4
+
+      - name: Checkout launchfast-template
+        uses: actions/checkout@v4
+        with:
+          repository: casal-innovations/launchfast-template
+          path: ../launchfast-template
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Check Node version sync
+        run: npx tsx scripts/check-node-sync.ts
+
   test:
     name: Test
     runs-on: ubuntu-latest

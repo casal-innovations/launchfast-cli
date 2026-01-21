@@ -28,7 +28,7 @@
 	},
 	"sideEffects": false,
 	"engines": {
-		"node": ">=18"
+		"node": "20"
 	},
 	"dependencies": {
 		"ini": "^5.0.0",
