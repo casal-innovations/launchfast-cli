@@ -7,6 +7,8 @@ import { startAuthFlow } from './auth/startAuthFlow.js'
 import { pollForVerification } from './auth/pollForVerification.js'
 import { writeNpmToken } from './npm/writeNpmToken.js'
 import { promptEmail } from './ui/promptEmail.js'
+import { c } from './terminal.js'
+import { VERSION } from './version.js'
 
 // Invariant check: runs before any application logic
 checkNodeVersion()
@@ -32,7 +34,7 @@ function setupCleanExit(): void {
 export async function run(): Promise<void> {
 	setupCleanExit()
 
-	console.log('\n🚀 LaunchFast CLI\n')
+	console.log(`\n🚀 LaunchFast CLI ${c.dim(`v${VERSION}`)}\n`)
 
 	if (await hasValidAccess()) {
 		console.log('✓ Valid access token found\n')
