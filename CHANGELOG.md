@@ -1,3 +1,9 @@
+## [1.2.0](https://github.com/casal-innovations/launchfast-cli/compare/v1.1.0...v1.2.0) (2026-01-21)
+
+### Features
+
+* add Node version invariant check with colored output ([a8fb12e](https://github.com/casal-innovations/launchfast-cli/commit/a8fb12e7e0ef54114f390296e4692cf6738e2b2d))
+
 ## [1.1.0](https://github.com/casal-innovations/launchfast-cli/compare/v1.0.0...v1.1.0) (2026-01-21)
 
 ### Features
