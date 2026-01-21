@@ -1,3 +1,9 @@
+## [1.3.0](https://github.com/casal-innovations/launchfast-cli/compare/v1.2.0...v1.3.0) (2026-01-21)
+
+### Features
+
+* display version in CLI banner ([9b824cb](https://github.com/casal-innovations/launchfast-cli/commit/9b824cbbe7dd4c4ee7b708d3e5e1b36f86374d27))
+
 ## [1.2.0](https://github.com/casal-innovations/launchfast-cli/compare/v1.1.0...v1.2.0) (2026-01-21)
 
 ### Features
