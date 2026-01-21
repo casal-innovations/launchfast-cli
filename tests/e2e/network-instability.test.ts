@@ -21,10 +21,11 @@ describe('E2E: Network Instability During Polling', () => {
 				}),
 				'/resources/cli-auth/status': async () => {
 					pollCount++
-					// Simulate network errors for first 5 requests, then succeed
-					// Need at least 3 consecutive errors to trigger "Network unstable" message
+					// Simulate transient errors for first 5 requests, then succeed
+					// Need at least 3 consecutive errors to trigger warning message
+					// Throwing simulates network failure; on some platforms this becomes HTTP 500
 					if (pollCount <= 5) {
-						throw new Error('Simulated network failure')
+						throw new Error('Simulated transient failure')
 					}
 					return {
 						status: 200,
@@ -69,8 +70,10 @@ describe('E2E: Network Instability During Polling', () => {
 		const npmrcContent = await readFile(npmrcPath, 'utf-8')
 		expect(npmrcContent).toContain('//registry.npmjs.org/:_authToken=npm-token-after-network-issues')
 
-		// Verify network warning was shown
-		expect(result.stdout).toContain('Network unstable')
+		// Verify transient error warning was shown (either network or server error)
+		const hasTransientErrorMessage =
+			result.stdout.includes('Network unstable') || result.stdout.includes('Server error (500)')
+		expect(hasTransientErrorMessage).toBe(true)
 		expect(result.stdout).toContain('Connection restored')
 	})
 })
