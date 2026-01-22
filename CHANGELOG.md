@@ -1,3 +1,9 @@
+## [1.3.2](https://github.com/casal-innovations/launchfast-cli/compare/v1.3.1...v1.3.2) (2026-01-22)
+
+### Bug Fixes
+
+* allow E2E tests to bypass Node version check ([4446459](https://github.com/casal-innovations/launchfast-cli/commit/4446459e011102fd45ac0ccbc4622c8dca856cb6))
+
 ## [1.3.1](https://github.com/casal-innovations/launchfast-cli/compare/v1.3.0...v1.3.1) (2026-01-21)
 
 ### Bug Fixes
