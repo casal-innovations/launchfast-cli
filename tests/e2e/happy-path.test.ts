@@ -1,6 +1,4 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach, afterEach } from 'vitest'
-import { readFile } from 'fs/promises'
-import { join } from 'path'
 import { createMockServer, startServer, stopServer } from './helpers/server.js'
 import { runCLI, createIsolatedHome, cleanupHome } from './helpers/cli.js'
 import type { Server } from 'http'
@@ -28,7 +26,7 @@ describe('E2E: Happy Path', () => {
 					}
 					return {
 						status: 200,
-						body: { status: 'verified', token: 'npm-token-happy-path' },
+						body: { status: 'verified', session: 'test-session-happy' },
 					}
 				},
 			},
@@ -49,13 +47,12 @@ describe('E2E: Happy Path', () => {
 		await cleanupHome(testHome)
 	})
 
-	it('authenticates successfully and writes token to .npmrc', async () => {
+	it('authenticates successfully', async () => {
 		const result = await runCLI({
 			env: {
 				HOME: testHome,
 				LAUNCHFAST_API: `http://localhost:${PORT}`,
 				LAUNCHFAST_SKIP_NODE_CHECK: 'true',
-				LAUNCHFAST_SKIP_NPM_CHECK: 'true',
 				LAUNCHFAST_SKIP_INSTALLER: 'true',
 			},
 			input: 'user@example.com\n',
@@ -64,11 +61,6 @@ describe('E2E: Happy Path', () => {
 
 		// Verify exit code 0
 		expect(result.exitCode).toBe(0)
-
-		// Verify .npmrc was created with token
-		const npmrcPath = join(testHome, '.npmrc')
-		const npmrcContent = await readFile(npmrcPath, 'utf-8')
-		expect(npmrcContent).toContain('//registry.npmjs.org/:_authToken=npm-token-happy-path')
 
 		// Verify success message in stdout
 		expect(result.stdout).toContain('Authentication successful')

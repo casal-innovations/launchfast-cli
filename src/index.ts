@@ -1,11 +1,7 @@
-import { exec } from 'child_process'
-import { homedir } from 'os'
-import { join } from 'path'
-import { promisify } from 'util'
 import { checkNodeVersion } from './invariants.js'
 import { startAuthFlow } from './auth/startAuthFlow.js'
 import { pollForVerification } from './auth/pollForVerification.js'
-import { writeNpmToken } from './npm/writeNpmToken.js'
+import { downloadInstaller, cleanupInstaller } from './installer/downloadInstaller.js'
 import { promptEmail } from './ui/promptEmail.js'
 import { c } from './terminal.js'
 import { VERSION } from './version.js'
@@ -13,10 +9,7 @@ import { VERSION } from './version.js'
 // Invariant check: runs before any application logic
 checkNodeVersion()
 
-const execAsync = promisify(exec)
-
 const POLL_INTERVAL_MS = 3000
-const NPMRC_PATH = join(homedir(), '.npmrc')
 
 /**
  * Set up clean exit handler for Ctrl+C
@@ -36,81 +29,91 @@ export async function run(): Promise<void> {
 
 	console.log(`\n🚀 LaunchFast CLI ${c.dim(`v${VERSION}`)}\n`)
 
-	if (await hasValidAccess()) {
-		console.log('✓ Valid access token found\n')
-	} else {
-		console.log('No valid access token found. Starting authentication...\n')
-		await authenticate()
-	}
+	// Authenticate and get session
+	const sessionId = await authenticate()
 
-	await installInstallerPackage()
-	await runInstaller()
-}
+	// Download installer package
+	const installerPath = await downloadInstallerPackage(sessionId)
 
-/**
- * Check if user has valid npm access to the private installer package.
- * Returns a boolean result - the "not found" case is an expected outcome, not an error.
- */
-async function hasValidAccess(): Promise<boolean> {
-	if (process.env.LAUNCHFAST_SKIP_NPM_CHECK === 'true') {
-		console.log('⚠️  LAUNCHFAST_SKIP_NPM_CHECK=true — npm access validation skipped (development mode)\n')
-		return false // Force authentication flow for testing
-	}
-
-	// Boundary call - execAsync can throw for expected reasons (package not accessible)
-	// We catch exactly once and convert to explicit boolean result
+	// Run installer and cleanup
 	try {
-		await execAsync('npm view @launchfasthq/installer version --json')
-		return true
-	} catch {
-		// Expected outcome: user doesn't have access to the package
-		return false
+		await runInstaller(installerPath)
+	} finally {
+		await cleanupInstaller(installerPath)
 	}
 }
 
 /**
- * Install the private installer package using npm.
- * This is called after authentication to download the package.
+ * Download the installer package from the LaunchFast server.
+ * Returns the path to the extracted installer.
  */
-async function installInstallerPackage(): Promise<void> {
+async function downloadInstallerPackage(sessionId: string): Promise<string> {
 	if (process.env.LAUNCHFAST_SKIP_INSTALLER === 'true') {
-		return
+		console.log('⚠️  LAUNCHFAST_SKIP_INSTALLER=true — installer download skipped (testing mode)\n')
+		return ''
 	}
 
-	console.log('Installing LaunchFast installer package...\n')
-	try {
-		await execAsync('npm install @launchfasthq/installer@latest --no-save')
-	} catch (error) {
-		if (error instanceof Error) {
-			console.error('Error: Failed to install the installer package.')
-			console.error('Please ensure your authentication token is valid.')
-			if ('stderr' in error) {
-				console.error(`\nDetails: ${(error as { stderr: string }).stderr}`)
-			}
-		}
+	console.log('Downloading LaunchFast installer package...\n')
+
+	const result = await downloadInstaller(sessionId)
+
+	if (result.type === 'success') {
+		console.log(`✓ Downloaded installer v${result.version}\n`)
+		return result.installerPath
+	}
+
+	// Handle error cases
+	if (result.type === 'auth_error') {
+		console.error('Error: Authentication failed.')
+		console.error(result.message)
+		console.error('\nPlease try running the command again.')
 		process.exit(1)
 	}
+
+	if (result.type === 'not_found') {
+		console.error('Error: No installer package available.')
+		console.error(result.message)
+		console.error('\nPlease contact support@launchfast.pro if this persists.')
+		process.exit(1)
+	}
+
+	if (result.type === 'checksum_mismatch') {
+		console.error('Error: Package integrity check failed.')
+		console.error(`Expected checksum: ${result.expected}`)
+		console.error(`Actual checksum: ${result.actual}`)
+		console.error('\nThis could indicate a corrupted download. Please try again.')
+		process.exit(1)
+	}
+
+	// Boundary error
+	console.error('Error: Failed to download installer package.')
+	console.error(result.error.message)
+	console.error('\nPlease check your internet connection and try again.')
+	process.exit(1)
 }
 
 /**
- * Run the installer package.
+ * Run the installer package from the extracted path.
  * Handles the expected case of module not found separately from unexpected errors.
  */
-async function runInstaller(): Promise<void> {
+async function runInstaller(installerPath: string): Promise<void> {
 	if (process.env.LAUNCHFAST_SKIP_INSTALLER === 'true') {
 		console.log('⚠️  LAUNCHFAST_SKIP_INSTALLER=true — installer skipped (testing mode)\n')
 		return
 	}
 
-	// Dynamic import is a boundary call that can fail in expected ways
+	// Dynamic import from the extracted package path
+	// The package entry point should be at installerPath/dist/index.js
+	const modulePath = `file://${installerPath}/dist/index.js`
+
 	let installerModule: { install: () => Promise<void> }
 	try {
-		installerModule = await import('@launchfasthq/installer')
+		installerModule = await import(modulePath)
 	} catch (error) {
 		// Check for expected "module not found" error
 		if (error instanceof Error && 'code' in error && error.code === 'ERR_MODULE_NOT_FOUND') {
 			console.error('Error: Could not load installer package.')
-			console.error('Please ensure you have completed authentication.')
+			console.error('The downloaded package may be corrupted. Please try again.')
 			process.exit(1)
 		}
 		// Unexpected import error - this is an invariant violation, rethrow
@@ -122,9 +125,10 @@ async function runInstaller(): Promise<void> {
 }
 
 /**
- * Run the email verification authentication flow
+ * Run the email verification authentication flow.
+ * Returns the verified session ID for downloading the installer.
  */
-async function authenticate(): Promise<void> {
+async function authenticate(): Promise<string> {
 	const email = await promptEmail()
 
 	console.log(`\nStarting authentication for ${email}...`)
@@ -137,10 +141,10 @@ async function authenticate(): Promise<void> {
 	console.log(`Polling every ${POLL_INTERVAL_MS / 1000}s...`)
 	console.log('\nPress Ctrl+C to cancel authentication\n')
 
-	const token = await pollForVerification(sessionId)
+	// Poll until verified - returns the same session ID once verified
+	const verifiedSessionId = await pollForVerification(sessionId)
 
-	await writeNpmToken(token)
+	console.log('\n✓ Authentication successful!\n')
 
-	console.log('\n✓ Authentication successful!')
-	console.log(`  Access token written to ${NPMRC_PATH} (registry.npmjs.org)\n`)
+	return verifiedSessionId
 }

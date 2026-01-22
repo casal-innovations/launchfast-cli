@@ -3,7 +3,7 @@ import { type Result, type BoundaryError, ok, err, networkError, parseError } fr
 
 type AuthStatusResponse = {
 	status: 'pending' | 'verified' | 'expired'
-	token?: string
+	session?: string
 	error?: string
 }
 
@@ -12,7 +12,7 @@ type AuthStatusResponse = {
  * These model all expected outcomes explicitly.
  */
 type PollResult =
-	| { type: 'verified'; token: string }
+	| { type: 'verified'; session: string }
 	| { type: 'expired' }
 	| { type: 'pending' }
 	| { type: 'boundary_error'; error: BoundaryError }
@@ -79,11 +79,11 @@ async function attemptPoll(
 
 	// Domain logic - classify status (no exceptions)
 	if (data.status === 'verified') {
-		if (!data.token) {
-			// Invariant violation: verified status must have token
-			return { type: 'invariant_violation', message: 'No token returned after verification' }
+		if (!data.session) {
+			// Invariant violation: verified status must have session
+			return { type: 'invariant_violation', message: 'No session returned after verification' }
 		}
-		return { type: 'verified', token: data.token }
+		return { type: 'verified', session: data.session }
 	}
 
 	if (data.status === 'expired') {
@@ -151,7 +151,7 @@ export async function pollForVerification(sessionId: string, deps: Partial<PollF
 			if (previousStatus === 'pending') {
 				console.log('Verification link opened — finalizing access...')
 			}
-			return result.token
+			return result.session
 		}
 
 		if (result.type === 'expired') {

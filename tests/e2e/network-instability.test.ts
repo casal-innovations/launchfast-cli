@@ -1,6 +1,4 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach, afterEach } from 'vitest'
-import { readFile } from 'fs/promises'
-import { join } from 'path'
 import { createMockServer, startServer, stopServer } from './helpers/server.js'
 import { runCLI, createIsolatedHome, cleanupHome } from './helpers/cli.js'
 import type { Server } from 'http'
@@ -29,7 +27,7 @@ describe('E2E: Network Instability During Polling', () => {
 					}
 					return {
 						status: 200,
-						body: { status: 'verified', token: 'npm-token-after-network-issues' },
+						body: { status: 'verified', session: 'session-after-network-issues' },
 					}
 				},
 			},
@@ -56,7 +54,6 @@ describe('E2E: Network Instability During Polling', () => {
 				HOME: testHome,
 				LAUNCHFAST_API: `http://localhost:${PORT}`,
 				LAUNCHFAST_SKIP_NODE_CHECK: 'true',
-				LAUNCHFAST_SKIP_NPM_CHECK: 'true',
 				LAUNCHFAST_SKIP_INSTALLER: 'true',
 			},
 			input: 'user@example.com\n',
@@ -65,11 +62,6 @@ describe('E2E: Network Instability During Polling', () => {
 
 		// Verify exit code 0 (eventual success)
 		expect(result.exitCode).toBe(0)
-
-		// Verify .npmrc was created with token
-		const npmrcPath = join(testHome, '.npmrc')
-		const npmrcContent = await readFile(npmrcPath, 'utf-8')
-		expect(npmrcContent).toContain('//registry.npmjs.org/:_authToken=npm-token-after-network-issues')
 
 		// Verify transient error warning was shown (either network or server error)
 		const hasTransientErrorMessage =

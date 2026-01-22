@@ -19,10 +19,10 @@ describe('pollForVerification', () => {
 		vi.clearAllMocks()
 	})
 
-	it('returns token immediately when status is verified', async () => {
+	it('returns session immediately when status is verified', async () => {
 		const mockFetch = vi.fn().mockResolvedValue({
 			ok: true,
-			json: () => Promise.resolve({ status: 'verified', token: 'npm-token-123' }),
+			json: () => Promise.resolve({ status: 'verified', session: 'session-123' }),
 		})
 
 		const result = await pollForVerification('session-123', {
@@ -32,7 +32,7 @@ describe('pollForVerification', () => {
 			apiUrl: 'http://localhost:3000',
 		})
 
-		expect(result).toBe('npm-token-123')
+		expect(result).toBe('session-123')
 		expect(mockFetch).toHaveBeenCalledTimes(1)
 	})
 
@@ -49,7 +49,7 @@ describe('pollForVerification', () => {
 			})
 			.mockResolvedValueOnce({
 				ok: true,
-				json: () => Promise.resolve({ status: 'verified', token: 'token-after-pending' }),
+				json: () => Promise.resolve({ status: 'verified', session: 'session-after-pending' }),
 			})
 
 		const result = await pollForVerification('session-123', {
@@ -60,7 +60,7 @@ describe('pollForVerification', () => {
 			pollIntervalMs: 100,
 		})
 
-		expect(result).toBe('token-after-pending')
+		expect(result).toBe('session-after-pending')
 		expect(mockFetch).toHaveBeenCalledTimes(3)
 		expect(mockSleep).toHaveBeenCalledTimes(2)
 	})
@@ -81,10 +81,10 @@ describe('pollForVerification', () => {
 		).rejects.toThrow(ExitError)
 	})
 
-	it('fails hard if verified without token', async () => {
+	it('fails hard if verified without session', async () => {
 		const mockFetch = vi.fn().mockResolvedValue({
 			ok: true,
-			json: () => Promise.resolve({ status: 'verified' }), // Missing token
+			json: () => Promise.resolve({ status: 'verified' }), // Missing session
 		})
 
 		await expect(
@@ -94,7 +94,7 @@ describe('pollForVerification', () => {
 				exit: mockExit,
 				apiUrl: 'http://localhost:3000',
 			})
-		).rejects.toThrow('No token returned after verification')
+		).rejects.toThrow('No session returned after verification')
 	})
 
 	it('times out after pollTimeoutMs', async () => {
@@ -133,7 +133,7 @@ describe('pollForVerification', () => {
 			.mockRejectedValueOnce(new Error('Network error'))
 			.mockResolvedValueOnce({
 				ok: true,
-				json: () => Promise.resolve({ status: 'verified', token: 'recovered-token' }),
+				json: () => Promise.resolve({ status: 'verified', session: 'recovered-session' }),
 			})
 
 		const result = await pollForVerification('session-123', {
@@ -145,14 +145,14 @@ describe('pollForVerification', () => {
 			pollTimeoutMs: 10000,
 		})
 
-		expect(result).toBe('recovered-token')
+		expect(result).toBe('recovered-session')
 		expect(mockFetch).toHaveBeenCalledTimes(4)
 	})
 
 	it('does not continue polling after termination (verified)', async () => {
 		const mockFetch = vi.fn().mockResolvedValue({
 			ok: true,
-			json: () => Promise.resolve({ status: 'verified', token: 'token' }),
+			json: () => Promise.resolve({ status: 'verified', session: 'session-123' }),
 		})
 
 		await pollForVerification('session-123', {
