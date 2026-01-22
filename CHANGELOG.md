@@ -1,3 +1,14 @@
+## [1.4.0](https://github.com/casal-innovations/launchfast-cli/compare/v1.3.2...v1.4.0) (2026-01-22)
+
+### ⚠ BREAKING CHANGES
+
+* CLI now requires launchfast.pro server to serve the
+installer package at /resources/installer/download endpoint.
+
+### Features
+
+* replace NPM token with self-hosted package download ([036da1a](https://github.com/casal-innovations/launchfast-cli/commit/036da1aff72cfa73e857933fc447a1f8b8ff6a1a))
+
 ## [1.3.2](https://github.com/casal-innovations/launchfast-cli/compare/v1.3.1...v1.3.2) (2026-01-22)
 
 ### Bug Fixes

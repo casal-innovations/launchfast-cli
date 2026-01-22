@@ -1,6 +1,6 @@
 {
 	"name": "@launchfasthq/cli",
-	"version": "1.3.2",
+	"version": "1.4.0",
 	"description": "LaunchFast CLI - Authentication and orchestration for LaunchFast projects",
 	"type": "module",
 	"main": "./dist/index.js",
