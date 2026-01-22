@@ -10,6 +10,10 @@ import { c } from './terminal.js'
 const REQUIRED_NODE_MAJOR = 20
 
 export function checkNodeVersion(): void {
+	if (process.env.LAUNCHFAST_SKIP_NODE_CHECK === 'true') {
+		return
+	}
+
 	const currentMajor = parseInt(process.versions.node.split('.')[0], 10)
 
 	if (currentMajor !== REQUIRED_NODE_MAJOR) {

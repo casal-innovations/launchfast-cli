@@ -34,9 +34,6 @@
 		"ini": "^5.0.0",
 		"zod": "^3.23.8"
 	},
-	"optionalDependencies": {
-		"@launchfasthq/installer": "latest"
-	},
 	"devDependencies": {
 		"@commitlint/cli": "^20.3.1",
 		"@commitlint/config-conventional": "^20.3.1",

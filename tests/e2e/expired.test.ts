@@ -44,6 +44,7 @@ describe('E2E: Expired Verification Session', () => {
 			env: {
 				HOME: testHome,
 				LAUNCHFAST_API: `http://localhost:${PORT}`,
+				LAUNCHFAST_SKIP_NODE_CHECK: 'true',
 				LAUNCHFAST_SKIP_NPM_CHECK: 'true',
 				LAUNCHFAST_SKIP_INSTALLER: 'true',
 			},
