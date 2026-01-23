@@ -39,6 +39,11 @@ jobs:
         run: npm test
 
       - name: Release
+        id: semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npx semantic-release
+
+      - name: Publish to npm with OIDC
+        if: steps.semantic-release.outcome == 'success'
+        run: npm publish --provenance --access public
