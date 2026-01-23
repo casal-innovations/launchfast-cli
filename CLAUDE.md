@@ -1,5 +1,26 @@
 # CLAUDE.md
 
+This repository is part of the **LaunchFast system**.
+
+---
+
+## Canonical Authority
+
+The authoritative LaunchFast doctrine lives at:
+
+```
+../CLAUDE.md
+```
+
+That file defines:
+
+- correctness doctrine
+- entropy constraints
+- authority model
+- cross‑repo law
+
+---
+
 ## Workflow Requirements
 
 - Always run tests (`npm test`) before committing changes.
@@ -29,15 +50,3 @@ these, the change must be redesigned or rejected.
 - **Stop on ambiguity**
   If requirements, intent, or correctness are unclear, STOP and ask before
   proceeding. Guessing is considered a failure mode.
-
-### Commit Identity & Authority
-
-- **All commits MUST be authored and signed by a human owner** (André Casal).
-  This is non-negotiable.
-- **Claude Code MUST NEVER appear as the commit author, committer, or signer.**
-- Claude Code MAY stage changes (`git add`), propose commit boundaries, and
-  draft commit messages.
-- Final commit creation (`git commit`) and any push to shared branches REQUIRE
-  explicit human confirmation and execution.
-- **Never add "Co-Authored-By" lines** to commit messages. Responsibility and
-  authorship remain exclusively human-owned.
