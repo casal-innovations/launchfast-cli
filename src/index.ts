@@ -1,7 +1,7 @@
 import { checkNodeVersion } from './invariants.js'
 import { startAuthFlow } from './auth/startAuthFlow.js'
 import { pollForVerification } from './auth/pollForVerification.js'
-import { downloadInstaller, cleanupInstaller } from './installer/downloadInstaller.js'
+import { downloadInstaller, cleanupInstaller, type Channel } from './installer/downloadInstaller.js'
 import { promptEmail } from './ui/promptEmail.js'
 import { c } from './terminal.js'
 import { VERSION } from './version.js'
@@ -10,6 +10,15 @@ import { VERSION } from './version.js'
 checkNodeVersion()
 
 const POLL_INTERVAL_MS = 3000
+
+/**
+ * Parse command line arguments.
+ * Returns the release channel based on flags.
+ */
+function parseArgs(args: string[]): { channel: Channel } {
+	const isPreflight = args.includes('--preflight')
+	return { channel: isPreflight ? 'preflight' : 'stable' }
+}
 
 /**
  * Set up clean exit handler for Ctrl+C
@@ -23,17 +32,21 @@ function setupCleanExit(): void {
 
 /**
  * Main entry point for the CLI
+ * @param args - Command line arguments (defaults to process.argv.slice(2))
  */
-export async function run(): Promise<void> {
+export async function run(args: string[] = process.argv.slice(2)): Promise<void> {
 	setupCleanExit()
 
-	console.log(`\n🚀 LaunchFast CLI ${c.dim(`v${VERSION}`)}\n`)
+	const { channel } = parseArgs(args)
+	const isPreflight = channel === 'preflight'
+
+	console.log(`\n🚀 LaunchFast CLI ${c.dim(`v${VERSION}`)}${isPreflight ? c.yellow(' [PREFLIGHT]') : ''}\n`)
 
 	// Authenticate and get session
 	const sessionId = await authenticate()
 
 	// Download installer package
-	const installerPath = await downloadInstallerPackage(sessionId)
+	const installerPath = await downloadInstallerPackage(sessionId, channel)
 
 	// Run installer and cleanup
 	try {
@@ -47,15 +60,16 @@ export async function run(): Promise<void> {
  * Download the installer package from the LaunchFast server.
  * Returns the path to the extracted installer.
  */
-async function downloadInstallerPackage(sessionId: string): Promise<string> {
+async function downloadInstallerPackage(sessionId: string, channel: Channel): Promise<string> {
 	if (process.env.LAUNCHFAST_SKIP_INSTALLER === 'true') {
 		console.log('⚠️  LAUNCHFAST_SKIP_INSTALLER=true — installer download skipped (testing mode)\n')
 		return ''
 	}
 
-	console.log('Downloading LaunchFast installer package...\n')
+	const channelLabel = channel === 'preflight' ? 'preflight ' : ''
+	console.log(`Downloading LaunchFast ${channelLabel}installer package...\n`)
 
-	const result = await downloadInstaller(sessionId)
+	const result = await downloadInstaller(sessionId, channel)
 
 	if (result.type === 'success') {
 		console.log(`✓ Downloaded installer v${result.version}\n`)

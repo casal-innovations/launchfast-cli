@@ -42,7 +42,7 @@ describe('downloadInstaller', () => {
 			arrayBuffer: () => Promise.resolve(arrayBuffer),
 		} as unknown as Response)
 
-		const result = await downloadInstaller('session-123', {
+		const result = await downloadInstaller('session-123', 'stable', {
 			fetch: mockFetch,
 			apiUrl: 'http://localhost:3000',
 		})
@@ -61,7 +61,7 @@ describe('downloadInstaller', () => {
 			json: () => Promise.resolve({ error: 'Session not verified' }),
 		} as unknown as Response)
 
-		const result = await downloadInstaller('session-123', {
+		const result = await downloadInstaller('session-123', 'stable', {
 			fetch: mockFetch,
 			apiUrl: 'http://localhost:3000',
 		})
@@ -79,7 +79,7 @@ describe('downloadInstaller', () => {
 			json: () => Promise.resolve({ error: 'No active installer package available' }),
 		} as unknown as Response)
 
-		const result = await downloadInstaller('session-123', {
+		const result = await downloadInstaller('session-123', 'stable', {
 			fetch: mockFetch,
 			apiUrl: 'http://localhost:3000',
 		})
@@ -93,7 +93,7 @@ describe('downloadInstaller', () => {
 	it('returns boundary_error for network failures', async () => {
 		const mockFetch: FetchFn = vi.fn().mockRejectedValue(new Error('Network error'))
 
-		const result = await downloadInstaller('session-123', {
+		const result = await downloadInstaller('session-123', 'stable', {
 			fetch: mockFetch,
 			apiUrl: 'http://localhost:3000',
 		})
@@ -118,7 +118,7 @@ describe('downloadInstaller', () => {
 			arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
 		} as unknown as Response)
 
-		const result = await downloadInstaller('session-123', {
+		const result = await downloadInstaller('session-123', 'stable', {
 			fetch: mockFetch,
 			apiUrl: 'http://localhost:3000',
 		})
@@ -150,7 +150,7 @@ describe('downloadInstaller', () => {
 			arrayBuffer: () => Promise.resolve(arrayBuffer),
 		} as unknown as Response)
 
-		const result = await downloadInstaller('session-123', {
+		const result = await downloadInstaller('session-123', 'stable', {
 			fetch: mockFetch,
 			apiUrl: 'http://localhost:3000',
 		})
@@ -162,20 +162,37 @@ describe('downloadInstaller', () => {
 		}
 	})
 
-	it('encodes session ID in URL', async () => {
+	it('encodes session ID and channel in URL', async () => {
 		const mockFetch: FetchFn = vi.fn().mockResolvedValue({
 			ok: false,
 			status: 404,
 			json: () => Promise.resolve({ error: 'Not found' }),
 		} as unknown as Response)
 
-		await downloadInstaller('session with spaces', {
+		await downloadInstaller('session with spaces', 'stable', {
 			fetch: mockFetch,
 			apiUrl: 'http://localhost:3000',
 		})
 
 		expect(mockFetch).toHaveBeenCalledWith(
-			'http://localhost:3000/resources/installer/download?session=session%20with%20spaces',
+			'http://localhost:3000/resources/installer/download?session=session+with+spaces&channel=stable',
+		)
+	})
+
+	it('passes preflight channel in URL when specified', async () => {
+		const mockFetch: FetchFn = vi.fn().mockResolvedValue({
+			ok: false,
+			status: 404,
+			json: () => Promise.resolve({ error: 'Not found' }),
+		} as unknown as Response)
+
+		await downloadInstaller('session-123', 'preflight', {
+			fetch: mockFetch,
+			apiUrl: 'http://localhost:3000',
+		})
+
+		expect(mockFetch).toHaveBeenCalledWith(
+			'http://localhost:3000/resources/installer/download?session=session-123&channel=preflight',
 		)
 	})
 })

@@ -16,6 +16,8 @@ export type DownloadResult =
 	| { type: 'checksum_mismatch'; expected: string; actual: string }
 	| { type: 'boundary_error'; error: BoundaryError }
 
+export type Channel = 'stable' | 'preflight'
+
 export interface DownloadInstallerDeps {
 	fetch: FetchFn
 	apiUrl: string
@@ -32,20 +34,26 @@ function getDefaultDeps(): DownloadInstallerDeps {
  * Downloads and extracts the installer package from the LaunchFast server.
  *
  * @param sessionId - The verified CLI session ID
+ * @param channel - The release channel ('stable' or 'preflight')
+ * @param deps - Optional dependency injection for testing
  * @returns Result containing the path to the extracted installer or an error
  */
 export async function downloadInstaller(
 	sessionId: string,
+	channel: Channel = 'stable',
 	deps: Partial<DownloadInstallerDeps> = {},
 ): Promise<DownloadResult> {
 	const { fetch, apiUrl } = { ...getDefaultDeps(), ...deps }
 
+	// Build download URL with channel parameter
+	const downloadUrl = new URL(`${apiUrl}/resources/installer/download`)
+	downloadUrl.searchParams.set('session', sessionId)
+	downloadUrl.searchParams.set('channel', channel)
+
 	// Download tarball
 	let response: Response
 	try {
-		response = await fetch(
-			`${apiUrl}/resources/installer/download?session=${encodeURIComponent(sessionId)}`,
-		)
+		response = await fetch(downloadUrl.toString())
 	} catch (error) {
 		const message = error instanceof Error ? error.message : String(error)
 		return { type: 'boundary_error', error: networkError(message) }
