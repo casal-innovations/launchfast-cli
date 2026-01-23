@@ -1,3 +1,9 @@
+## [1.5.1](https://github.com/casal-innovations/launchfast-cli/compare/v1.5.0...v1.5.1) (2026-01-23)
+
+### Bug Fixes
+
+* remove registry-url to allow npm native OIDC auth ([4836747](https://github.com/casal-innovations/launchfast-cli/commit/4836747467163d10d4b84969580c22dcc4891c1f))
+
 ## [1.5.0](https://github.com/casal-innovations/launchfast-cli/compare/v1.4.0...v1.5.0) (2026-01-23)
 
 ### Features
