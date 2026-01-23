@@ -1,3 +1,9 @@
+## [1.5.2](https://github.com/casal-innovations/launchfast-cli/compare/v1.5.1...v1.5.2) (2026-01-23)
+
+### Bug Fixes
+
+* configure workflow for npm OIDC trusted publishing ([d5c003b](https://github.com/casal-innovations/launchfast-cli/commit/d5c003b5955f9858de2e4c0df0f4f6430ae0c45b))
+
 ## [1.5.1](https://github.com/casal-innovations/launchfast-cli/compare/v1.5.0...v1.5.1) (2026-01-23)
 
 ### Bug Fixes
