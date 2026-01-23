@@ -3,4 +3,4 @@
 # See: https://mise.jdx.dev/
 
 [tools]
-node = "20"
+node = "24"
