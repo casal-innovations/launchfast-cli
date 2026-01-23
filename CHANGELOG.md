@@ -1,3 +1,9 @@
+## [1.6.0](https://github.com/casal-innovations/launchfast-cli/compare/v1.5.2...v1.6.0) (2026-01-23)
+
+### Features
+
+* upgrade to Node 24 for npm OIDC trusted publishing ([a06577c](https://github.com/casal-innovations/launchfast-cli/commit/a06577c90d881c66924c8ccab6d444983d776d60))
+
 ## [1.5.2](https://github.com/casal-innovations/launchfast-cli/compare/v1.5.1...v1.5.2) (2026-01-23)
 
 ### Bug Fixes
