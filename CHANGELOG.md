@@ -1,3 +1,15 @@
+## [1.5.0](https://github.com/casal-innovations/launchfast-cli/compare/v1.4.0...v1.5.0) (2026-01-23)
+
+### Features
+
+* add --preflight flag for testing preflight installer packages ([5ee4161](https://github.com/casal-innovations/launchfast-cli/commit/5ee4161a51420fa54497fdbd9d7d41a77d6b4805))
+
+### Bug Fixes
+
+* configure npm OIDC provenance for semantic-release ([d681fba](https://github.com/casal-innovations/launchfast-cli/commit/d681fbaa24dba13d90d4e45b2205ad838ff800c6))
+* remove NPM_TOKEN from release workflow and update CLAUDE.md ([909eb5b](https://github.com/casal-innovations/launchfast-cli/commit/909eb5bc925a111411b13a4adc2f933284be9746))
+* use npm OIDC for publishing instead of NPM_TOKEN ([e8435a6](https://github.com/casal-innovations/launchfast-cli/commit/e8435a6cccbfc8808a347ad2f2c0fa1e32814757))
+
 ## [1.4.0](https://github.com/casal-innovations/launchfast-cli/compare/v1.3.2...v1.4.0) (2026-01-22)
 
 ### ⚠ BREAKING CHANGES
