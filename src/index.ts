@@ -1,4 +1,4 @@
-import { checkNodeVersion } from './invariants.js'
+import { checkNodeVersion, checkFlyCliAsync } from './invariants.js'
 import { startAuthFlow } from './auth/startAuthFlow.js'
 import { pollForVerification } from './auth/pollForVerification.js'
 import { downloadInstaller, cleanupInstaller, type Channel } from './installer/downloadInstaller.js'
@@ -35,6 +35,9 @@ function setupCleanExit(): void {
  * @param args - Command line arguments (defaults to process.argv.slice(2))
  */
 export async function run(args: string[] = process.argv.slice(2)): Promise<void> {
+	// Fly CLI check (async, so must be inside run())
+	await checkFlyCliAsync()
+
 	setupCleanExit()
 
 	const { channel } = parseArgs(args)
