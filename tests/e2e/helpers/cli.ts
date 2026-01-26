@@ -21,7 +21,12 @@ export async function runCLI(options: CLIOptions = {}): Promise<CLIResult> {
 
 	return new Promise((resolve, reject) => {
 		const proc = spawn('node', [cliPath], {
-			env: { ...process.env, ...options.env },
+			env: {
+				...process.env,
+				// Skip fly CLI check in E2E tests (tests focus on auth flow, not fly installation)
+				LAUNCHFAST_SKIP_FLY_CHECK: 'true',
+				...options.env,
+			},
 			stdio: ['pipe', 'pipe', 'pipe'],
 		})
 
