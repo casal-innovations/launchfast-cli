@@ -1,3 +1,9 @@
+## [1.8.0](https://github.com/casal-innovations/launchfast-cli/compare/v1.7.0...v1.8.0) (2026-01-26)
+
+### Features
+
+* unified system requirements check with status table ([eb6a1bc](https://github.com/casal-innovations/launchfast-cli/commit/eb6a1bcbf38999e505ae4a6ca0f9307ae85583d1))
+
 ## [1.7.0](https://github.com/casal-innovations/launchfast-cli/compare/v1.6.0...v1.7.0) (2026-01-26)
 
 ### Features
