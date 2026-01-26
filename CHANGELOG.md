@@ -1,3 +1,13 @@
+## [1.7.0](https://github.com/casal-innovations/launchfast-cli/compare/v1.6.0...v1.7.0) (2026-01-26)
+
+### Features
+
+* add fly CLI prerequisite check with install prompt ([76a9db2](https://github.com/casal-innovations/launchfast-cli/commit/76a9db2678e3ecaa6400fe592b34706e19aa831e))
+
+### Bug Fixes
+
+* skip fly CLI check in E2E tests ([41fce78](https://github.com/casal-innovations/launchfast-cli/commit/41fce7840678c252cea6902bbc6d51b00a33afb9))
+
 ## [1.6.0](https://github.com/casal-innovations/launchfast-cli/compare/v1.5.2...v1.6.0) (2026-01-23)
 
 ### Features
