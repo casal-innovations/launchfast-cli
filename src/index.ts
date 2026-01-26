@@ -1,13 +1,10 @@
-import { checkNodeVersion, checkFlyCliAsync } from './invariants.js'
+import { checkSystemRequirements } from './invariants.js'
 import { startAuthFlow } from './auth/startAuthFlow.js'
 import { pollForVerification } from './auth/pollForVerification.js'
 import { downloadInstaller, cleanupInstaller, type Channel } from './installer/downloadInstaller.js'
 import { promptEmail } from './ui/promptEmail.js'
 import { c } from './terminal.js'
 import { VERSION } from './version.js'
-
-// Invariant check: runs before any application logic
-checkNodeVersion()
 
 const POLL_INTERVAL_MS = 3000
 
@@ -35,15 +32,15 @@ function setupCleanExit(): void {
  * @param args - Command line arguments (defaults to process.argv.slice(2))
  */
 export async function run(args: string[] = process.argv.slice(2)): Promise<void> {
-	// Fly CLI check (async, so must be inside run())
-	await checkFlyCliAsync()
-
 	setupCleanExit()
 
 	const { channel } = parseArgs(args)
 	const isPreflight = channel === 'preflight'
 
 	console.log(`\n🚀 LaunchFast CLI ${c.dim(`v${VERSION}`)}${isPreflight ? c.yellow(' [PREFLIGHT]') : ''}\n`)
+
+	// Check all system requirements (Node, Git, Fly CLI)
+	await checkSystemRequirements()
 
 	// Authenticate and get session
 	const sessionId = await authenticate()
